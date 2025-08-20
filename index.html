@@ -1,56 +1,31 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Grabsy Finds</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #f8f9fa;
-      color: #333;
-      text-align: center;
-    }
+<div id="product-list" class="product-grid"></div>
 
-    /* Header */
-    .header {
-      background-color: #28a745;
-      color: white;
-      padding: 20px;
-    }
+<script>
+const sheetURL = "YOUR_GOOGLE_SHEET_PUBLISHED_CSV_LINK";
 
-    .header h1 {
-      margin: 0;
-    }
+async function loadProducts() {
+  const response = await fetch(sheetURL);
+  const text = await response.text();
+  const rows = text.split("\n").slice(1); // Skip header row
 
-    .header p {
-      margin: 5px 0 0;
-      font-size: 14px;
-    }
+  let productHTML = "";
+  rows.forEach(row => {
+    const cols = row.split(",");
+    if (cols.length < 4) return; // Skip incomplete rows
+    const [name, desc, img, link] = cols;
 
-    /* Hero Section */
-    .hero {
-      background: url("https://images.unsplash.com/photo-1501004318641-b39e6451bec6") no-repeat center center/cover;
-      height: 300px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 28px;
-      font-weight: bold;
-      text-shadow: 2px 2px 6px rgba(0,0,0,0.7);
-    }
+    productHTML += `
+      <div class="product-card">
+        <img src="${img}" alt="${name}" class="product-img"/>
+        <h3>${name}</h3>
+        <p>${desc}</p>
+        <a href="${link}" target="_blank" class="buy-btn">Buy on Amazon</a>
+      </div>
+    `;
+  });
 
-    /* Product Grid */
-    .products {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      padding: 30px;
-      flex-wrap: wrap;
-    }
+  document.getElementById("product-list").innerHTML = productHTML;
+}
 
-    .card {
-      background: white;
-      bord
+loadProducts();
+</script>
