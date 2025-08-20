@@ -1,125 +1,39 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Grabsy Finds</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f4f4f4;
-    }
-    header {
-      background: #4CAF50;
-      color: white;
-      padding: 20px;
-      text-align: center;
-    }
-    .hero {
-      background: url("https://images.unsplash.com/photo-1501004318641-b39e6451bec6") no-repeat center center/cover;
-      height: 300px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: white;
-      font-size: 28px;
-      font-weight: bold;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.6);
-    }
-    .container {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      padding: 30px;
-      gap: 20px;
-    }
-    .card {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      width: 300px;
-      padding: 20px;
-      text-align: center;
-      transition: transform 0.2s;
-    }
-    .card:hover {
-      transform: scale(1.05);
-    }
-    .card img {
-      width: 100%;
-      height: auto;
-      border-radius: 8px;
-    }
-    .card h3 {
-      margin: 15px 0;
-    }
-    .card p {
-      font-size: 14px;
-      color: #555;
-    }
-    .btn {
-      display: inline-block;
-      background: #ff9900;
-      color: white;
-      padding: 10px 20px;
-      margin-top: 10px;
-      border-radius: 6px;
-      text-decoration: none;
-      font-weight: bold;
-      transition: background 0.3s;
-    }
-    .btn:hover {
-      background: #cc7a00;
-    }
-    footer {
-      text-align: center;
-      padding: 20px;
-      background: #333;
-      color: white;
-      margin-top: 30px;
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>Grabsy Finds</h1>
-    <p>Handpicked essentials just for you ✨</p>
-  </header>
-
-  <div class="hero">
-    Grab + Easy Finds = Grabsy Finds
+<!-- Product 1: Pigeon Inox Hydra Curve 700ml -->
+<div class="product-card">
+  <img src="images/pigeon-bottle.jpg" alt="Pigeon Inox Hydra Curve 700ml Bottle" class="product-img">
+  
+  <h3 class="product-title">Pigeon Inox Hydra Curve 700ml</h3>
+  
+  <p class="product-description">
+    Stainless Steel Water Bottle | Leak Proof | Sipper Cap Curve | BPA Free | 
+    Lightweight (0.3kg) | Capacity: 0.7L | Colour: Silver
+  </p>
+  
+  <div class="product-price">
+    <span class="mrp">M.R.P: <del>₹395</del></span>
+    <span class="offer">Now: ₹154.75</span>
+    <span class="discount">(-61%)</span>
   </div>
+  
+  <a href="https://amzn.to/4fFPV6I" target="_blank" class="buy-btn">Buy Now</a>
 
-  <div class="container">
-    <!-- Product 1: Water Bottle -->
-    <div class="card">
-      <img src="https://m.media-amazon.com/images/I/61zFMLFaGzL._SX679_.jpg" alt="Pigeon Inox Hydra Curve Bottle">
-      <h3>Pigeon Inox Hydra Curve 700ml Water Bottle</h3>
-      <p>Stainless steel, durable, leak-proof design – perfect for office and daily use.</p>
-      <a href="https://amzn.to/3Ju6jLD" target="_blank" class="btn">Buy on Amazon</a>
-    </div>
-
-    <!-- Product 2: Perfume -->
-    <div class="card">
-      <img src="https://via.placeholder.com/300x300.png?text=Perfume+Image" alt="Perfume">
-      <h3>Celeste Perfume</h3>
-      <p>Long-lasting fragrance for daily wear with a refreshing floral scent.</p>
-      <a href="#" target="_blank" class="btn">Buy on Amazon</a>
-    </div>
-
-    <!-- Product 3: Skin Cream -->
-    <div class="card">
-      <img src="https://via.placeholder.com/300x300.png?text=Skin+Cream+Image" alt="Skin Cream">
-      <h3>Skin Tone Cream</h3>
-      <p>Moisturizing daily cream to keep your skin soft, fresh, and glowing.</p>
-      <a href="#" target="_blank" class="btn">Buy on Amazon</a>
-    </div>
+  <!-- Product Specifications -->
+  <div class="product-specs">
+    <h4>Product Information</h4>
+    <table>
+      <tr><td><b>Brand</b></td><td>Pigeon</td></tr>
+      <tr><td><b>Model</b></td><td>Water Bottle</td></tr>
+      <tr><td><b>Material</b></td><td>Stainless Steel</td></tr>
+      <tr><td><b>Colour</b></td><td>Silver</td></tr>
+      <tr><td><b>Shape</b></td><td>Round</td></tr>
+      <tr><td><b>Style</b></td><td>Sipper Cap Curve</td></tr>
+      <tr><td><b>Capacity</b></td><td>0.7 Litres</td></tr>
+      <tr><td><b>Item Weight</b></td><td>0.3 kg</td></tr>
+      <tr><td><b>Item Dimensions</b></td><td>11W × 2H mm</td></tr>
+      <tr><td><b>Special Features</b></td><td>Leak Proof, Wide Mouth, BPA Free</td></tr>
+      <tr><td><b>Care Instructions</b></td><td>Hand Wash Only</td></tr>
+      <tr><td><b>Customer Reviews</b></td><td>⭐ 3.7/5 (325 reviews)</td></tr>
+      <tr><td><b>ASIN</b></td><td>B08YZMHG1K</td></tr>
+    </table>
   </div>
-
-  <footer>
-    <p>© 2025 Grabsy Finds | Affiliate Links Used</p>
-  </footer>
-</body>
-</html>
+</div>
