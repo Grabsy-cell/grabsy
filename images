@@ -1,1 +1,13 @@
+grabsy/
+  ├── index.html
+  ├── bottle.html
+  ├── perfume.html
+  ├── cream.html
+  ├── images/
+      ├── bottle.png
+      ├── perfume.png
+      ├── cream.png
+<img src="images/bottle.png" alt="Water Bottle">
+<img src="images/perfume.png" alt="Perfume">
+<img src="images/cream.png" alt="Skin Cream">
 
