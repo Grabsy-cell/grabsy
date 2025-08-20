@@ -3,6 +3,123 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grabsy Finds</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: #fdfdfd;
+      color: #333;
+    }
+
+    header {
+      background: #4CAF50;
+      color: white;
+      padding: 20px 40px;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 28px;
+    }
+
+    .hero {
+      background: url('https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=1600&q=80') no-repeat center center/cover;
+      height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      text-shadow: 1px 1px 5px rgba(0,0,0,0.6);
+    }
+
+    .hero h2 {
+      font-size: 36px;
+    }
+
+    .products {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      padding: 40px;
+    }
+
+    .product {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      overflow: hidden;
+      text-align: center;
+      padding-bottom: 20px;
+    }
+
+    .product img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+    }
+
+    .product h3 {
+      margin: 15px 0 10px;
+      font-size: 20px;
+    }
+
+    .product p {
+      font-size: 14px;
+      color: #555;
+      padding: 0 15px;
+    }
+
+    .buy-btn {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 10px 20px;
+      background: #ff9900;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .buy-btn:hover {
+      background: #cc7a00;
+    }
+
+    footer {
+      background: #f4f4f4;
+      text-align: center;
+      padding: 15px;
+      font-size: 14px;
+      margin-top: 20px;
+      border-top: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Grabsy Finds</h1>
+    <p>Handpicked essentials just for you ✨</p>
+  </header>
+
+  <section class="hero">
+    <h2>Conversion Optimized eCommerce Theme</h2>
+  </section>
+
+  <section class="products">
+    <!-- Product 1 -->
+    <div class="product">
+      <img src="https://m.media-amazon.com/images/I/61Lz5Z3n6yL._AC_SL1500_.jpg" alt="Water Bottle">
+      <h3>Office Use Water Bottle</h3>
+      <p>Stainless steel Milton bottle – compact, leakproof, and stylish for office use.</p>
+      <a href="YOUR-AMAZON-LINK" target="_blank" class="buy-btn">Buy on Amazon</a>
+
+      <html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Office Use Water Bottle</title>
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -41,5 +158,30 @@
       <a href="https://www.amazon.in/dp/B08YZMHG1K" target="_blank" class="btn btn-buy">Buy on Amazon</a>
     </div>
   </div>
+</body>
+</html>
+    </div>
+
+    <!-- Product 2 -->
+    <div class="product">
+      <img src="https://m.media-amazon.com/images/I/71xZz3Sb2DL._AC_SL1500_.jpg" alt="Perfume">
+      <h3>Celeste Perfume</h3>
+      <p>Long-lasting fragrance for daily wear with a refreshing floral scent.</p>
+      <a href="YOUR-AMAZON-LINK" target="_blank" class="buy-btn">Buy on Amazon</a>
+    </div>
+
+    <!-- Product 3 -->
+    <div class="product">
+      <img src="https://m.media-amazon.com/images/I/61TgPehJ9uL._AC_SL1500_.jpg" alt="Skin Cream">
+      <h3>Skin Tone Cream</h3>
+      <p>Moisturizing daily cream to keep your skin soft, fresh, and glowing.</p>
+      <a href="YOUR-AMAZON-LINK" target="_blank" class="buy-btn">Buy on Amazon</a>
+    </div>
+  </section>
+
+  <footer>
+    © 2025 Grabsy Finds | As an Amazon Associate I earn from qualifying purchases.
+  </footer>
+
 </body>
 </html>
