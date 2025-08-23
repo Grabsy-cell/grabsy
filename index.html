@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Grabsy Finds</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <style>
     body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f7fdf7; }
     header { background: #2d6a4f; color: white; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; }
@@ -40,18 +41,16 @@
     async function fetchProducts() {
       const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyjqk5-lDiw3arwv281cvWMPyAfp7_uBUXVWlQslsixT-u5fAXSNmV0gkB5-HieWRqYGOI7JFdhsJ8/pub?output=csv";
       const response = await fetch(url);
-      const data = await response.text();
-      const rows = data.split("\n").map(r => r.split(","));
+      const csvText = await response.text();
 
-      const headers = rows[0].map(h => h.trim());
-      const products = rows.slice(1).map(row => {
-        let obj = {};
-        headers.forEach((h, i) => { obj[h] = row[i]; });
-        return obj;
+      Papa.parse(csvText, {
+        header: true,
+        skipEmptyLines: true,
+        complete: function(results) {
+          allProducts = results.data;
+          displayProducts(allProducts);
+        }
       });
-
-      allProducts = products.filter(p => p["Product Name"]); 
-      displayProducts(allProducts);
     }
 
     function displayProducts(products) {
@@ -78,7 +77,7 @@
       if (category === "All") {
         displayProducts(allProducts);
       } else {
-        displayProducts(allProducts.filter(p => (p["Category"] || "").toLowerCase() === category.toLowerCase()));
+        displayProducts(allProducts.filter(p => (p["Category"] || "").toLowerCase().trim() === category.toLowerCase().trim()));
       }
     }
 
