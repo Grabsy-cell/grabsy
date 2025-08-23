@@ -24,6 +24,32 @@
     header p {
       margin: 5px 0 0;
     }
+
+    /* Category Filter Bar */
+    .filter-bar {
+      text-align: center;
+      margin: 15px 0;
+    }
+    .filter-bar button {
+      margin: 5px;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      background: #e0e0e0;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s, color 0.3s;
+    }
+    .filter-bar button:hover {
+      background: #2e7d32;
+      color: white;
+    }
+    .filter-bar button.active {
+      background: #2e7d32;
+      color: white;
+    }
+
+    /* Product Cards */
     .products {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -71,15 +97,22 @@
   </style>
 </head>
 <body>
+  <!-- Header -->
   <header>
     <h1>Grabsy Finds</h1>
     <p>Grab + Easy Finds = Grabsy Finds</p>
   </header>
 
+  <!-- Category Filter -->
+  <div class="filter-bar" id="filter-bar"></div>
+
+  <!-- Products Section -->
   <main class="products" id="products"></main>
 
   <script>
     const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyjqk5-lDiw3arwv281cvWMPyAfp7_uBUXVWlQslsixT-u5fAXSNmV0gkB5-HieWRqYGOI7JFdhsJ8/pub?output=csv";
+
+    let allProducts = [];
 
     async function fetchProducts() {
       const response = await fetch(sheetUrl);
@@ -88,30 +121,58 @@
       const container = document.getElementById("products");
       container.innerHTML = "";
 
-      rows.forEach(row => {
+      allProducts = rows.map(row => {
         const cols = row.split(",");
-        if (cols.length < 6) return; // skip incomplete rows
+        if (cols.length < 6) return null;
+        return {
+          name: cols[0].trim(),
+          description: cols[1].trim(),
+          imageUrl: cols[2].trim(),
+          amazonLink: cols[3].trim(),
+          price: cols[4].trim(),
+          category: cols[5].trim()
+        };
+      }).filter(p => p && p.name && p.imageUrl && p.amazonLink);
 
-        const name = cols[0].trim();
-        const description = cols[1].trim();
-        const imageUrl = cols[2].trim();
-        const amazonLink = cols[3].trim();
-        const price = cols[4].trim();
-        const category = cols[5].trim();
+      renderProducts("All");
+      renderFilterBar();
+    }
 
-        if (name && imageUrl && amazonLink) {
-          const product = document.createElement("div");
-          product.className = "product";
-          product.innerHTML = `
-            <img src="${imageUrl}" alt="${name}">
-            <h2>${name}</h2>
-            <p>${description}</p>
-            <p><strong>${price}</strong></p>
-            <p><em>Category: ${category}</em></p>
-            <a href="${amazonLink}" target="_blank">Check on Amazon</a>
-          `;
-          container.appendChild(product);
-        }
+    function renderProducts(category) {
+      const container = document.getElementById("products");
+      container.innerHTML = "";
+      const filtered = category === "All" ? allProducts : allProducts.filter(p => p.category === category);
+
+      filtered.forEach(p => {
+        const product = document.createElement("div");
+        product.className = "product";
+        product.innerHTML = `
+          <img src="${p.imageUrl}" alt="${p.name}">
+          <h2>${p.name}</h2>
+          <p>${p.description}</p>
+          <p><strong>${p.price}</strong></p>
+          <p><em>Category: ${p.category}</em></p>
+          <a href="${p.amazonLink}" target="_blank">Check on Amazon</a>
+        `;
+        container.appendChild(product);
+      });
+    }
+
+    function renderFilterBar() {
+      const filterBar = document.getElementById("filter-bar");
+      const categories = ["All", ...new Set(allProducts.map(p => p.category))];
+      filterBar.innerHTML = "";
+
+      categories.forEach((cat, index) => {
+        const button = document.createElement("button");
+        button.textContent = cat;
+        if (index === 0) button.classList.add("active"); // Default: "All" is active
+        button.onclick = () => {
+          document.querySelectorAll(".filter-bar button").forEach(btn => btn.classList.remove("active"));
+          button.classList.add("active");
+          renderProducts(cat);
+        };
+        filterBar.appendChild(button);
       });
     }
 
