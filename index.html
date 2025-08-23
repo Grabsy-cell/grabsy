@@ -3,77 +3,114 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Grabsy Finds</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-50 font-sans">
-
-  <!-- Header -->
-  <header class="bg-green-600 text-white text-center p-6">
-    <h1 class="text-3xl font-bold">Grabsy Finds</h1>
-    <p class="mt-2">Handpicked essentials just for you ✨</p>
-  </header>
-
-  <!-- Hero Section -->
-  <section class="relative bg-gray-100 text-center py-12">
-    <img src="https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=1400&q=80" 
-         alt="Hero Banner" 
-         class="mx-auto rounded-lg shadow-lg max-h-80 object-cover">
-    <h2 class="absolute inset-0 flex items-center justify-center text-3xl sm:text-4xl font-extrabold text-white drop-shadow-lg">
-      Grab + Easy Finds = Grabsy Finds
-    </h2>
-  </section>
-
-  <!-- Product Section -->
-  <section class="products py-12 px-6">
-    <h2 class="text-center text-2xl font-bold mb-6">Our Picks</h2>
-    <div id="product-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"></div>
-  </section>
-
-  <!-- Footer -->
-  <footer class="bg-green-600 text-white text-center p-4">
-    <p>&copy; 2025 Grabsy Finds | Made with ❤️</p>
-  </footer>
-
-  <!-- Google Sheet Fetch Script -->
-  <script>
-    // 👇 Replace this with your published Google Sheet CSV link
-    const sheetURL = https://docs.google.com/spreadsheets/d/1UzfheO8LeHtje8jULZeugkd_vxB-rA2F0MB6YGerWyk/edit?gid=0#gid=0
-    async function loadProducts() {
-      try {
-        const response = await fetch(sheetURL);
-        const text = await response.text();
-        const rows = text.split("\n").slice(1); // skip header row
-
-        let productHTML = "";
-        rows.forEach(row => {
-          const cols = row.split(",");
-          if (cols.length < 4) return;
-
-          const [name, desc, img, link] = cols;
-
-          productHTML += `
-            <div class="p-6 bg-white shadow-lg rounded-2xl text-center">
-              <img src="${img}" alt="${name}" class="mx-auto h-40 object-contain mb-4"/>
-              <h3 class="font-semibold text-lg mb-2">${name}</h3>
-              <p class="text-sm text-gray-600 mb-3">${desc}</p>
-              <a href="${link}" target="_blank" 
-                 class="inline-block bg-orange-500 text-white px-4 py-2 rounded-lg shadow hover:bg-orange-600">
-                Buy on Amazon
-              </a>
-            </div>
-          `;
-        });
-
-        document.getElementById("product-list").innerHTML = productHTML;
-      } catch (err) {
-        console.error("Error loading products:", err);
-        document.getElementById("product-list").innerHTML = 
-          "<p class='text-center text-red-500'>Failed to load products. Check your Google Sheet link.</p>";
-      }
+  <title>Grabsy Store</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f8f9fa;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
     }
+    h1 {
+      margin-bottom: 20px;
+    }
+    #products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      max-width: 1200px;
+      margin: auto;
+    }
+    .card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      padding: 15px;
+      text-align: center;
+      transition: transform 0.2s;
+    }
+    .card:hover {
+      transform: scale(1.03);
+    }
+    .card img {
+      width: 100%;
+      height: 180px;
+      object-fit: contain;
+      margin-bottom: 10px;
+    }
+    .card h3 {
+      font-size: 16px;
+      margin: 10px 0;
+      height: 40px;
+      overflow: hidden;
+    }
+    .card .price {
+      color: green;
+      font-weight: bold;
+      margin: 5px 0 15px;
+    }
+    .card .cta {
+      display: inline-block;
+      background: #ff9900;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 5px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .card .cta:hover {
+      background: #e68a00;
+    }
+  </style>
+</head>
+<body>
 
-    loadProducts();
+  <h1>Grabsy Store</h1>
+  <p>Latest deals curated for you 👇</p>
+
+  <div id="products-grid"></div>
+
+  <script>
+    (async function() {
+      const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyjqk5-lDiw3arwv281cvWMPyAfp7_uBUXVWlQslsixT-u5fAXSNmV0gkB5-HieWRqYGOI7JFdhsJ8/pub?output=csv";
+
+      async function loadProducts() {
+        try {
+          const res = await fetch(sheetURL);
+          const text = await res.text();
+          const lines = text.trim().split('\n');
+          lines.shift(); // remove header row
+          const container = document.getElementById('products-grid');
+          container.innerHTML = '';
+
+          lines.forEach(line => {
+            const cols = line.split(',');
+            if (cols.length < 4) return;
+            const item = {
+              title: cols[0],
+              image: cols[1],
+              price: cols[2],
+              url: cols[3]
+            };
+
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+              <img src="${item.image}" alt="${item.title}" />
+              <h3>${item.title}</h3>
+              <p class="price">${item.price}</p>
+              <a href="${item.url}" target="_blank" class="cta">Buy Now</a>
+            `;
+            container.appendChild(card);
+          });
+        } catch (err) {
+          console.error("Failed to load products:", err);
+        }
+      }
+
+      await loadProducts();
+    })();
   </script>
 
 </body>
