@@ -1,175 +1,196 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Grabsy Finds</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
+    :root{
+      --green:#2e7d32;
+      --green-dark:#1b5e20;
+      --bg:#f4f8f5;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
       background: linear-gradient(to right, #e8f5e9, #ffffff);
-      margin: 0;
-      padding: 0;
+      color:#222;
     }
-    header {
-      background-color: #2e7d32;
-      color: white;
-      padding: 15px;
-      text-align: center;
-      font-size: 26px;
-      font-weight: bold;
+    header{
+      background:var(--green);
+      color:#fff;
+      text-align:center;
+      padding:22px 12px 14px;
     }
-    .controls {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin: 20px;
+    header h1{margin:0;font-size:28px;font-weight:800;letter-spacing:.2px}
+    header p{margin:4px 0 0;font-size:14px;opacity:.95}
+
+    .controls{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      justify-content:center;
+      padding:16px;
+      background:#fff;
+      border-bottom:1px solid #e7e7e7;
     }
-    select, input {
-      padding: 10px;
-      font-size: 16px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
+    .controls input,.controls select{
+      padding:10px 12px;
+      border:1px solid #cfd8dc;
+      border-radius:8px;
+      font-size:14px;
+      min-width:220px;
+      outline:none;
     }
-    .products {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 20px;
-      padding: 20px;
+
+    #products{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap:20px;
+      padding:22px;
+      max-width:1200px;
+      margin:0 auto 32px;
     }
-    .card {
-      background: white;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      padding: 15px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      text-align: center;
-      transition: transform 0.2s;
+    .card{
+      background:#fff;
+      border:1px solid #e6ebef;
+      border-radius:14px;
+      padding:16px;
+      box-shadow:0 4px 14px rgba(0,0,0,.06);
+      transition:transform .18s ease, box-shadow .18s ease;
     }
-    .card:hover {
-      transform: scale(1.03);
+    .card:hover{ transform: translateY(-4px); box-shadow:0 10px 22px rgba(0,0,0,.08); }
+    .thumb{
+      width:100%; height:190px; object-fit:contain;
+      border-radius:10px; background:#fafafa;
     }
-    .card img {
-      width: 100%;
-      height: 180px;
-      object-fit: contain;
-      border-radius: 8px;
-      margin-bottom: 10px;
+    h3{font-size:18px; margin:12px 0 6px; color:var(--green); line-height:1.2}
+    .desc{font-size:14px; color:#444; line-height:1.42; white-space:pre-line}
+    .meta{display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 0; font-size:12px; color:#666}
+    .price{font-weight:700; color:#111}
+    .category{background:#e8f5e9; color:#265f2a; padding:2px 8px; border-radius:999px}
+
+    .btn{
+      display:inline-block; margin-top:12px; padding:10px 14px;
+      color:#fff; background:var(--green); border-radius:10px;
+      font-weight:700; text-decoration:none;
     }
-    .card h3 {
-      font-size: 18px;
-      margin: 10px 0 5px;
-      color: #2e7d32;
-    }
-    .card p {
-      font-size: 14px;
-      color: #555;
-      min-height: 40px;
-    }
-    .card a {
-      display: inline-block;
-      margin-top: 10px;
-      padding: 8px 12px;
-      background-color: #2e7d32;
-      color: white;
-      text-decoration: none;
-      border-radius: 6px;
-      font-size: 14px;
-    }
-    .card a:hover {
-      background-color: #1b5e20;
-    }
-    .price {
-      font-weight: bold;
-      color: #000;
-      margin-top: 5px;
+    .btn:hover{ background:var(--green-dark); }
+    .empty{
+      text-align:center; color:#666; padding:40px 16px;
+      grid-column:1/-1;
     }
   </style>
+  <!-- Robust CSV parser -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 </head>
 <body>
-  <header>Grabsy Finds</header>
+  <header>
+    <h1>Grabsy Finds</h1>
+    <p>Grab + Easy Finds = Grabsy Finds</p>
+  </header>
 
   <div class="controls">
-    <input type="text" id="searchBar" placeholder="Search products...">
-    <select id="categoryFilter">
+    <input id="search" type="text" placeholder="Search products…" />
+    <select id="category">
       <option value="all">All Categories</option>
     </select>
   </div>
 
-  <div class="products" id="product-list"></div>
+  <div id="products"></div>
 
   <script>
-    const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyjqk5-lDiw3arwv281cvWMPyAfp7_uBUXVWlQslsixT-u5fAXSNmV0gkB5-HieWRqYGOI7JFdhsJ8/pub?output=csv";
+    // Your published CSV
+    const SHEET_CSV =
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyjqk5-lDiw3arwv281cvWMPyAfp7_uBUXVWlQslsixT-u5fAXSNmV0gkB5-HieWRqYGOI7JFdhsJ8/pub?output=csv";
 
-    async function fetchProducts() {
-      const res = await fetch(sheetUrl);
-      const text = await res.text();
-      const rows = text.split("\n").map(r => r.split(","));
+    // Helpers
+    const clean = v => (v || "").toString().trim().replace(/^"+|"+$/g, "");
+    const norm  = v => clean(v).toLowerCase();
 
-      const headers = rows[0].map(h => h.trim().toLowerCase());
-      const products = rows.slice(1).map(row => {
-        const item = {};
-        headers.forEach((h, i) => {
-          item[h] = row[i] ? row[i].trim() : "";
-        });
-        return item;
-      });
-      return products;
+    let ALL = [];
+
+    async function load() {
+      const res = await fetch(SHEET_CSV);
+      const csv = await res.text();
+
+      // Parse safely (handles commas & quotes inside cells)
+      const parsed = Papa.parse(csv, { header: true, skipEmptyLines: true });
+      const rows = parsed.data;
+
+      // Map exact headers
+      ALL = rows.map(r => ({
+        name:       clean(r["Product Name"]),
+        description:clean(r["Description"]),
+        imageUrl:   clean(r["Image URL"]),
+        amazonLink: clean(r["Amazon Link"]),
+        price:      clean(r["Price"]),
+        category:   clean(r["Category"])
+      })).filter(p => p.name); // keep valid rows
+
+      buildCategoryFilter(ALL);
+      render(ALL);
+      attachControls();
     }
 
-    function displayProducts(products) {
-      const list = document.getElementById("product-list");
-      list.innerHTML = "";
-      products.forEach(p => {
-        if (!p.name) return;
+    function buildCategoryFilter(products){
+      const sel = document.getElementById("category");
+      const cats = [...new Set(products
+        .map(p => p.category)
+        .filter(Boolean)
+        .map(c => c.trim())
+      )].sort((a,b) => a.localeCompare(b));
+      cats.forEach(c => {
+        const opt = document.createElement("option");
+        opt.value = c; opt.textContent = c;
+        sel.appendChild(opt);
+      });
+    }
+
+    function attachControls(){
+      const search = document.getElementById("search");
+      const cat = document.getElementById("category");
+      const apply = () => {
+        const q = norm(search.value);
+        const selected = cat.value;
+        const out = ALL.filter(p => {
+          const inCat = (selected === "all") || (p.category === selected);
+          const inText = !q || norm(p.name).includes(q) || norm(p.description).includes(q);
+          return inCat && inText;
+        });
+        render(out);
+      };
+      search.addEventListener("input", apply);
+      cat.addEventListener("change", apply);
+    }
+
+    function render(list){
+      const wrap = document.getElementById("products");
+      wrap.innerHTML = "";
+      if (!list.length){
+        wrap.innerHTML = `<div class="empty">No products match your filters.</div>`;
+        return;
+      }
+      list.forEach(p => {
         const card = document.createElement("div");
         card.className = "card";
         card.innerHTML = `
-          <img src="${p["image url"] || ""}" alt="${p.name}">
+          <img class="thumb" src="${p.imageUrl}" alt="${p.name}"
+               onerror="this.src=''; this.style.display='none'">
           <h3>${p.name}</h3>
-          <p>${p.description || ""}</p>
-          <div class="price">${p.price || ""}</div>
-          <a href="${p["amazon link"]}" target="_blank">Buy Now</a>
+          ${p.description ? `<div class="desc">${p.description}</div>` : ""}
+          <div class="meta">
+            ${p.price ? `<span class="price">${p.price}</span>` : ""}
+            ${p.category ? `<span class="category">${p.category}</span>` : ""}
+          </div>
+          ${p.amazonLink ? `<a class="btn" href="${p.amazonLink}" target="_blank" rel="nofollow noopener">Check on Amazon</a>` : ""}
         `;
-        list.appendChild(card);
+        wrap.appendChild(card);
       });
     }
 
-    function populateCategories(products) {
-      const filter = document.getElementById("categoryFilter");
-      const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
-      categories.forEach(cat => {
-        const option = document.createElement("option");
-        option.value = cat.toLowerCase();
-        option.textContent = cat;
-        filter.appendChild(option);
-      });
-    }
-
-    async function init() {
-      const products = await fetchProducts();
-      displayProducts(products);
-      populateCategories(products);
-
-      document.getElementById("searchBar").addEventListener("input", e => {
-        const query = e.target.value.toLowerCase();
-        const filtered = products.filter(p =>
-          p.name.toLowerCase().includes(query) ||
-          (p.description && p.description.toLowerCase().includes(query))
-        );
-        displayProducts(filtered);
-      });
-
-      document.getElementById("categoryFilter").addEventListener("change", e => {
-        const category = e.target.value;
-        const filtered = category === "all"
-          ? products
-          : products.filter(p => p.category && p.category.toLowerCase() === category);
-        displayProducts(filtered);
-      });
-    }
-
-    init();
+    load();
   </script>
 </body>
 </html>
