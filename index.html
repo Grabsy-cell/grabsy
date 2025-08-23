@@ -1,65 +1,120 @@
-<nav id="grabsy-navbar">
-  <ul>
-    <li data-category="all">All</li>
-    <li data-category="Men">Men</li>
-    <li data-category="Women">Women</li>
-    <li data-category="Kids">Kids</li>
-    <li data-category="Home & Kitchen">Home & Kitchen</li>
-    <li data-category="Beauty">Beauty & Health</li>
-  </ul>
-</nav>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Grabsy Finds</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <!-- PapaParse for CSV parsing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <style>
+    /* Category Menu Styling */
+    #grabsy-navbar { margin: 20px 0; text-align: center; }
+    #grabsy-navbar ul {
+      list-style: none; padding: 0;
+      display: inline-flex; gap: 15px;
+    }
+    #grabsy-navbar li {
+      cursor: pointer; padding: 6px 12px;
+      border-radius: 5px;
+      background: #e0e0e0;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+    #grabsy-navbar li:hover {
+      background: #c0c0c0;
+    }
+    /* Product Card Styling */
+    #grabsy-products {
+      display: flex; flex-wrap: wrap;
+      justify-content: center; gap: 20px;
+      padding: 0 20px 40px;
+    }
+    .grabsy-product {
+      width: 260px; background: white; border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 16px; text-align: center;
+      display: flex; flex-direction: column;
+    }
+    .grabsy-product img {
+      max-width: 100%; height: 180px; object-fit: contain;
+      margin-bottom: 12px;
+    }
+    .grabsy-product h3 {
+      margin: 8px 0; font-size: 1.1rem; color: #111;
+    }
+    .grabsy-product p {
+      flex: 1; font-size: 0.9rem; color: #555;
+      margin: 4px 0;
+    }
+    .grabsy-product a {
+      display: block; padding: 10px;
+      background: #28a745; color: white; text-decoration: none;
+      border-radius: 6px; margin-top: 10px;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    .grabsy-product a:hover {
+      background: #218838;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation with Category Tabs -->
+  <nav id="grabsy-navbar">
+    <ul>
+      <li data-category="all">All</li>
+      <li data-category="Men">Men</li>
+      <li data-category="Women">Women</li>
+      <li data-category="Kids">Kids</li>
+      <li data-category="Home & Kitchen">Home & Kitchen</li>
+      <li data-category="Beauty & Health">Beauty & Health</li>
+      <li data-category="Electronics">Electronics</li>
+      <li data-category="Grocery">Grocery</li>
+    </ul>
+  </nav>
 
-<div id="grabsy-products"></div>
+  <!-- Product Grid -->
+  <div id="grabsy-products">Loading products…</div>
 
-<script>
-  const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyjqk5-lDiw3arwv281cvWMPyAfp7_uBUXVWlQslsixT-u5fAXSNmV0gkB5-HieWRqYGOI7JFdhsJ8/pub?output=csv";
+  <script>
+    const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyjqk5-lDiw3arwv281cvWMPyAfp7_uBUXVWlQslsixT-u5fAXSNmV0gkB5-HieWRqYGOI7JFdhsJ8/pub?output=csv";
 
-  async function fetchProducts() {
-    const res = await fetch(sheetUrl);
-    const text = await res.text();
-    const rows = text.split("\n").map(r => r.split(","));
-    const headers = rows[0];
-    const products = rows.slice(1).map(r => {
-      let obj = {};
-      headers.forEach((h,i) => obj[h.trim()] = r[i]);
-      return obj;
-    });
-    return products;
-  }
+    async function fetchProducts() {
+      const res = await fetch(sheetUrl);
+      const text = await res.text();
+      const { data } = Papa.parse(text, { header: true, skipEmptyLines: true });
+      return data;
+    }
 
-  function displayProducts(products, filter="all") {
-    const container = document.getElementById("grabsy-products");
-    container.innerHTML = "";
-    products.filter(p => filter === "all" || (p.Category && p.Category.trim() === filter))
-      .forEach(p => {
-        const div = document.createElement("div");
-        div.className = "grabsy-product";
-        div.innerHTML = `
-          <img src="${p["Image URL"]}" alt="${p["Product Name"]}" />
-          <h3>${p["Product Name"]}</h3>
-          <p>${p.Description}</p>
-          <a href="${p["Amazon Link"]}" target="_blank">${p.Price}</a>
-        `;
-        container.appendChild(div);
+    function displayProducts(products, filter = "all") {
+      const container = document.getElementById("grabsy-products");
+      container.innerHTML = "";
+      products
+        .filter(p => filter === "all" || (p.Category && p.Category.trim() === filter))
+        .forEach(p => {
+          const card = document.createElement("div");
+          card.className = "grabsy-product";
+          card.innerHTML = `
+            <img src="${p["Image URL"] || ''}" alt="${p["Product Name"] || 'Item'}" onerror="this.src='https://via.placeholder.com/260?text=No+Image'" />
+            <h3>${p["Product Name"] || ''}</h3>
+            <p>${p["Description"] || ''}</p>
+            <p><strong>${p["Price"] || ''}</strong></p>
+            <a href="${p["Amazon Link"] || '#'}" target="_blank">Buy on Amazon</a>
+          `;
+          container.appendChild(card);
+        });
+    }
+
+    fetchProducts().then(products => {
+      displayProducts(products);
+
+      document.querySelectorAll("#grabsy-navbar li").forEach(tab => {
+        tab.addEventListener("click", () => {
+          displayProducts(products, tab.dataset.category);
+        });
       });
-  }
-
-  fetchProducts().then(products => {
-    displayProducts(products);
-
-    document.querySelectorAll("#grabsy-navbar li").forEach(tab => {
-      tab.addEventListener("click", () => {
-        displayProducts(products, tab.dataset.category);
-      });
     });
-  });
-</script>
-
-<style>
-  #grabsy-navbar { text-align:center; margin:20px 0; }
-  #grabsy-navbar ul { list-style:none; padding:0; display:flex; justify-content:center; gap:15px; }
-  #grabsy-navbar li { cursor:pointer; padding:5px 10px; border-radius:5px; }
-  #grabsy-navbar li:hover { background:#eee; }
-  .grabsy-product { border:1px solid #ddd; padding:15px; margin:10px; border-radius:10px; max-width:250px; display:inline-block; vertical-align:top; }
-  .grabsy-product img { width:100%; height:auto; }
-</style>
+  </script>
+</body>
+</html>
