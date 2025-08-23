@@ -1,83 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Grabsy Finds</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; margin:0; background:#f7fdf7; }
-    header { background:#2d6a4f; color:white; padding:20px; text-align:center; font-size:26px; }
-    .filters { text-align:center; margin:20px 0; }
-    .filters button { margin:5px; padding:10px 15px; border:none; border-radius:20px; cursor:pointer; background:#ccc; }
-    .filters button.active { background:#2d6a4f; color:white; }
-    .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:20px; padding:20px; }
-    .card { background:white; border-radius:12px; padding:15px; box-shadow:0 2px 6px rgba(0,0,0,0.1); text-align:center; }
-    .card img { max-width:100%; max-height:200px; object-fit:contain; margin-bottom:10px; }
-    .card h3 { font-size:18px; margin:10px 0; }
-    .card p { font-size:14px; color:#555; min-height:40px; }
-    .card a { display:inline-block; margin-top:10px; padding:10px 15px; background:#2d6a4f; color:white; text-decoration:none; border-radius:6px; }
-    .card a:hover { background:#1c4a36; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f4f9f4;
+    }
+    header {
+      background: #2e7d32;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+    }
+    .filters {
+      text-align: center;
+      margin: 15px;
+    }
+    .filters button {
+      margin: 5px;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      background: #e0e0e0;
+    }
+    .filters button.active {
+      background: #2e7d32;
+      color: white;
+    }
+    .products {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+      padding: 20px;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .card img {
+      max-width: 100%;
+      max-height: 200px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+    .card h3 {
+      font-size: 18px;
+      margin: 10px 0;
+    }
+    .card p {
+      font-size: 14px;
+      color: #444;
+      min-height: 40px;
+    }
+    .card a {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 10px 16px;
+      background: #ff9900;
+      color: white;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
   <header>Grabsy Finds</header>
-
+  
   <div class="filters">
-    <button class="active" onclick="filterCat('All')">All</button>
-    <button onclick="filterCat('Clothes')">Clothes</button>
-    <button onclick="filterCat('Home & Kitchen')">Home and Kitchen</button>
-    <button onclick="filterCat('Beauty and Fashion')">Beauty and Fashion</button>
-    <button onclick="filterCat('Kids')">Kids</button>
-    <button onclick="filterCat('Men')">Men</button>
-    <button onclick="filterCat('Women')">Women</button>
-  </div>
-
-  <div class="grid" id="grid"></div>
-
-  <script>
-    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyjqk5-lDiw3arwv281cvWMPyAfp7_uBUXVWlQslsixT-u5fAXSNmV0gkB5-HieWRqYGOI7JFdhsJ8/pub?output=csv";
-    let products = [];
-
-    async function init() {
-      const res = await fetch(CSV_URL);
-      const csv = await res.text();
-      Papa.parse(csv, {
-        header: true,
-        skipEmptyLines: true,
-        complete: function(results) {
-          products = results.data
-            .filter(p => p["Product Name"] && p["Image URL"] && p["Amazon Link"] && p["Category"]);
-          display(products);
-        }
-      });
-    }
-
-    function display(list) {
-      const grid = document.getElementById("grid");
-      grid.innerHTML = "";
-      list.forEach(p => {
-        const div = document.createElement("div");
-        div.className = "card";
-        div.setAttribute("data-cat", (p["Category"] || "").trim());
-        div.innerHTML = `
-          <img src="${p["Image URL"]}" alt="${p["Product Name"]}">
-          <h3>${p["Product Name"]}</h3>
-          <p>${p["Description"] || ""}</p>
-          <a href="${p["Amazon Link"]}" target="_blank">Buy on Amazon</a>
-        `;
-        grid.appendChild(div);
-      });
-    }
-
-    function filterCat(cat) {
-      document.querySelectorAll('.filters button').forEach(btn => btn.classList.remove('active'));
-      event.target.classList.add('active');
-      if (cat === 'All') display(products);
-      else display(products.filter(p => p["Category"].trim().toLowerCase() === cat.toLowerCase()));
-    }
-
-    window.onload = init;
-  </script>
-</body>
-</html>
+    <button class="active" onclick="filterProducts('All')">All</button
