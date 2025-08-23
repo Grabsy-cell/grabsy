@@ -1,206 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
   <title>Grabsy Finds</title>
-
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-
-  <!-- PapaParse -->
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-
   <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f9f9f9;
-      color: #333;
-    }
-
-    /* Header */
-    header {
-      background: #006400;
-      color: white;
-      padding: 1rem 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    header h1 {
-      margin: 0;
-      font-size: 1.5rem;
-    }
-    .search-bar input {
-      padding: 0.5rem;
-      border-radius: 20px;
-      border: none;
-      width: 300px;
-    }
-
-    /* Banner */
-    .banner {
-      background: linear-gradient(135deg, #00a651, #ffffff);
-      padding: 2rem;
-      text-align: center;
-      color: #fff;
-    }
-    .banner h2 {
-      font-size: 2rem;
-      margin: 0.5rem 0;
-    }
-    .banner p {
-      color: #eee;
-    }
-
-    /* Categories */
-    .categories {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 1rem;
-      padding: 1rem;
-      background: #fff;
-      border-bottom: 1px solid #ddd;
-    }
-    .category {
-      background: #00a651;
-      color: #fff;
-      padding: 0.5rem 1rem;
-      border-radius: 20px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      transition: background 0.3s ease;
-    }
-    .category:hover {
-      background: #008a45;
-    }
-
-    /* Products */
-    #products {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 1.5rem;
-      padding: 2rem;
-      max-width: 1200px;
-      margin: auto;
-    }
-    .product-card {
-      background: #fff;
-      border-radius: 12px;
-      padding: 1rem;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      text-align: center;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .product-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.15);
-    }
-    .product-image {
-      max-width: 100%;
-      max-height: 200px;
-      object-fit: contain;
-      margin-bottom: 1rem;
-    }
-    .product-card h3 {
-      margin: 0.5rem 0;
-      font-size: 1.1rem;
-      color: #222;
-    }
-    .product-card p {
-      font-size: 0.9rem;
-      color: #555;
-    }
-    .btn {
-      display: inline-block;
-      padding: 0.6rem 1.2rem;
-      margin-top: 0.8rem;
-      background: #00a651;
-      color: #fff;
-      font-weight: 600;
-      text-decoration: none;
-      border-radius: 6px;
-      transition: background 0.3s ease;
-    }
-    .btn:hover {
-      background: #008a45;
-    }
+    body { font-family: 'Poppins', sans-serif; margin:0; padding:0; background:#f3f3f3; color:#333; }
+    header { background:#157f3a; color:#fff; padding:16px; text-align:center; }
+    header h1 { margin:0; font-size:1.8rem; }
+    header p { margin:0; font-size:1rem; color:#d0f4c9; }
+    #products { display:grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); gap:1.2rem; padding:1.5rem; max-width:1200px; margin:auto; }
+    .card { background:#ffffff; border-radius:12px; padding:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; flex-direction:column; transition:transform .15s; }
+    .card:hover { transform: translateY(-4px); }
+    .card img { width:100%; height:180px; object-fit:contain; margin-bottom:12px; }
+    .card h3 { font-size:1.2rem; margin:8px 0; color:#111; }
+    .card p.desc { flex:1; font-size:0.95rem; color:#555; margin-bottom:8px; }
+    .card p.price { font-weight:600; color:#006600; margin:8px 0; }
+    .btn { background:#28a745; color:#fff; padding:10px 16px; border-radius:6px; text-align:center; text-decoration:none; font-weight:600; }
+    .btn:hover { background:#218838; }
   </style>
 </head>
 <body>
 
-  <!-- Header -->
   <header>
     <h1>Grabsy Finds</h1>
-    <div class="search-bar">
-      <input type="text" id="search" placeholder="Search products...">
-    </div>
+    <p>Grab + Easy Finds = Grabsy Finds</p>
   </header>
 
-  <!-- Banner -->
-  <section class="banner">
-    <h2>Grab + Easy Finds = Grabsy Finds</h2>
-    <p>Your one-stop shop for the best Amazon deals</p>
-  </section>
+  <div id="products"><p style="grid-column:1/-1; text-align:center;">Loading products…</p></div>
 
-  <!-- Categories -->
-  <section class="categories">
-    <div class="category">Clothing</div>
-    <div class="category">Electronics</div>
-    <div class="category">Home</div>
-    <div class="category">Beauty</div>
-    <div class="category">Sports</div>
-  </section>
-
-  <!-- Products -->
-  <main id="products">
-    <p style="grid-column: 1/-1; text-align:center;">Loading products...</p>
-  </main>
-
-  <!-- Script -->
   <script>
-    const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyjqk5-lDiw3arwv281cvWMPyAfp7_uBUXVWlQslsixT-u5fAXSNmV0gkB5-HieWRqYGOI7JFdhsJ8/pub?output=csv";
+    const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyjqk5-lDiw3arwv281cvWMPyAfp7_uBUXVWlQslsixT-u5fAXSNmV0gkB5-HieWRqYGOI7JFdhsJ8/pub?output=csv";
 
-    async function fetchProducts() {
-      const response = await fetch(sheetUrl);
-      const csvData = await response.text();
+    Papa.parse(sheetURL, {
+      download: true,
+      header: true,
+      skipEmptyLines: true,
+      complete: function(results) {
+        const container = document.getElementById("products");
+        container.innerHTML = "";
 
-      Papa.parse(csvData, {
-        header: true,
-        skipEmptyLines: true,
-        complete: function(results) {
-          const container = document.getElementById("products");
-          container.innerHTML = "";
+        results.data.forEach(row => {
+          const name = row["Product Name"]?.trim();
+          const desc = row["Description"]?.trim();
+          const img = (row["Image URL"]?.trim() || "").replace(/["']/g, '');
+          const url = (row["Amazon Link"]?.trim() || "#").replace(/["']/g, '');
+          const price = row["Price"]?.trim() || "Check Price";
+          if (!name) return;
 
-          results.data.forEach(row => {
-            const name = row["Product Name"]?.trim();
-            const description = row["Description"]?.trim();
-            const imageUrl = row["Image URL"]?.trim().replace(/"/g, '');
-            const amazonLink = row["Amazon Link"]?.trim().replace(/"/g, '');
-
-            if (!name) return;
-
-            const card = document.createElement("div");
-            card.className = "product-card";
-
-            card.innerHTML = `
-              <img src="${imageUrl}" alt="${name}" class="product-image" />
-              <h3>${name}</h3>
-              <p>${description}</p>
-              <a href="${amazonLink}" target="_blank" class="btn">Buy on Amazon</a>
-            `;
-
-            container.appendChild(card);
-          });
-        }
-      });
-    }
-
-    fetchProducts();
+          const card = document.createElement("div");
+          card.className = "card";
+          card.innerHTML = `
+            <img src="${img}" alt="${name}" onerror="this.src='https://via.placeholder.com/300?text=No+Image'" />
+            <h3>${name}</h3>
+            <p class="desc">${desc}</p>
+            <p class="price">${price}</p>
+            <a class="btn" href="${url}" target="_blank">Buy on Amazon</a>
+          `;
+          container.appendChild(card);
+        });
+      }
+    });
   </script>
-
 </body>
 </html>
