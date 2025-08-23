@@ -1,36 +1,43 @@
+<!-- Add PapaParse Library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
 <script>
   const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyjqk5-lDiw3arwv281cvWMPyAfp7_uBUXVWlQslsixT-u5fAXSNmV0gkB5-HieWRqYGOI7JFdhsJ8/pub?output=csv";
 
   async function fetchProducts() {
     const response = await fetch(sheetUrl);
-    const data = await response.text();
-    const rows = data.split("\n").slice(1); // Skip header row
-    const container = document.getElementById("products");
+    const csvData = await response.text();
 
-    rows.forEach(row => {
-      const cols = row.split(",");
-      if (cols.length < 5) return; // Skip if row is incomplete
+    Papa.parse(csvData, {
+      header: true,
+      skipEmptyLines: true,
+      complete: function(results) {
+        const container = document.getElementById("products");
+        container.innerHTML = "";
 
-      const name = cols[0]?.trim();
-      const description = cols[1]?.trim();
-      const imageUrl = cols[2]?.trim();
-      const amazonLink = cols[3]?.trim();
-      const price = cols[4]?.trim();
+        results.data.forEach(row => {
+          const name = row["Product Name"]?.trim();
+          const description = row["Description"]?.trim();
+          const imageUrl = row["Image URL"]?.trim().replace(/"/g, '');
+          const amazonLink = row["Amazon Link"]?.trim().replace(/"/g, '');
+          const price = row["Price"]?.trim();
 
-      if (!name) return; // Skip empty rows
+          if (!name) return;
 
-      const card = document.createElement("div");
-      card.className = "product-card";
+          const card = document.createElement("div");
+          card.className = "product-card";
 
-      card.innerHTML = `
-        <img src="${imageUrl}" alt="${name}" class="product-image" />
-        <h3>${name}</h3>
-        <p>${description}</p>
-        <p><strong>${price}</strong></p>
-        <a href="${amazonLink}" target="_blank" class="btn">Buy on Amazon</a>
-      `;
+          card.innerHTML = `
+            <img src="${imageUrl}" alt="${name}" class="product-image" style="max-width:200px; display:block; margin:auto;" />
+            <h3>${name}</h3>
+            <p>${description}</p>
+            <p><strong>${price}</strong></p>
+            <a href="${amazonLink}" target="_blank" class="btn">Buy on Amazon</a>
+          `;
 
-      container.appendChild(card);
+          container.appendChild(card);
+        });
+      }
     });
   }
 
