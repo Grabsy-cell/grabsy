@@ -1,133 +1,43 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Grabsy Finds</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin:0; background:#f8fff8; }
-    header { background:#2d7a2d; color:white; padding:15px; text-align:center; font-size:22px; font-weight:bold; }
-    .search-filter { text-align:center; margin:20px; }
-    .search-filter input, .search-filter select { padding:10px; margin:5px; border-radius:6px; border:1px solid #ccc; }
-    .categories { text-align:center; margin:15px 0; }
-    .categories button { margin:5px; padding:8px 15px; border:none; border-radius:8px; background:#eee; cursor:pointer; }
-    .categories button.active { background:#2d7a2d; color:white; }
-    .products { display:flex; flex-wrap:wrap; justify-content:center; gap:20px; padding:20px; }
-    .card { background:white; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.1); width:250px; padding:15px; text-align:center; }
-    .card img { width:100%; height:180px; object-fit:contain; }
-    .card h3 { font-size:18px; margin:10px 0; }
-    .card p { font-size:14px; color:#444; min-height:40px; }
-    .card a { display:inline-block; margin-top:10px; padding:10px 15px; background:#ff9900; color:white; text-decoration:none; border-radius:8px; }
-    .card a:hover { background:#e68a00; }
-  </style>
-</head>
-<body>
+// Your Google Sheet CSV export link
+const sheetURL = "https://docs.google.com/spreadsheets/d/1UzfheO8LeHtje8jUZeugkd_vxb-rA2F0MB6YGerWyk/gviz/tq?tqx=out:csv";
 
-<header>Grabsy Finds</header>
+async function loadProducts() {
+    const response = await fetch(sheetURL);
+    const data = await response.text();
 
-<div class="search-filter">
-  <input type="text" id="search" placeholder="Search products...">
-  <select id="categoryFilter"></select>
-</div>
+    // Parse CSV
+    const rows = data.split("\n").map(row => row.split(","));
+    const headers = rows[0];
+    const products = rows.slice(1).map(row => {
+        let item = {};
+        headers.forEach((h, i) => {
+            item[h.trim()] = row[i] ? row[i].trim() : "";
+        });
+        return item;
+    });
 
-<!-- Category Buttons -->
-<div class="categories" id="categoryButtons"></div>
-
-<!-- Products Section -->
-<div class="products" id="productList"></div>
-
-<script>
-// Sample Products (add more here)
-const products = [
-  {
-    name: "Office Use Water Bottle",
-    description: "Stainless steel Milton bottle – compact, leakproof, and stylish for office use.",
-    image: "https://m.media-amazon.com/images/I/61RGo-R7EOL._SX679_.jpg",
-    link: "https://amzn.to/3UF4OwD",
-    category: "Home and Kitchen"
-  },
-  {
-    name: "Celeste Perfume",
-    description: "Long-lasting fragrance for daily wear with a refreshing floral scent.",
-    image: "https://m.media-amazon.com/images/I/71lqm2wGq3L._SX522_.jpg",
-    link: "https://amzn.to/3VrX7cp",
-    category: "Beauty and Fashion"
-  },
-  {
-    name: "Skin Tone Cream",
-    description: "Moisturizing daily cream to keep your skin soft, fresh, and glowing.",
-    image: "https://m.media-amazon.com/images/I/61I7Iu1o1xL._SX522_.jpg",
-    link: "https://amzn.to/4erWf8O",
-    category: "Beauty and Fashion"
-  }
-];
-
-// ✅ Fixed categories
-const fixedCategories = ["All", "Clothes", "Home and Kitchen", "Beauty and Fashion", "Kids", "Men", "Women"];
-
-// DOM Elements
-const productList = document.getElementById("productList");
-const searchInput = document.getElementById("search");
-const categoryFilter = document.getElementById("categoryFilter");
-const categoryButtons = document.getElementById("categoryButtons");
-
-// Render Products
-function renderProducts(items) {
-  productList.innerHTML = "";
-  if(items.length === 0) {
-    productList.innerHTML = "<p>No products found</p>";
-    return;
-  }
-  items.forEach(p => {
-    productList.innerHTML += `
-      <div class="card">
-        <img src="${p.image}" alt="${p.name}">
-        <h3>${p.name}</h3>
-        <p>${p.description}</p>
-        <a href="${p.link}" target="_blank">Buy on Amazon</a>
-      </div>
-    `;
-  });
+    displayProducts(products);
 }
 
-// Load categories in dropdown + buttons
-function loadCategories() {
-  categoryFilter.innerHTML = fixedCategories.map(c => `<option value="${c}">${c}</option>`).join("");
-  categoryButtons.innerHTML = fixedCategories.map(c => 
-    `<button onclick="filterByCategory('${c}')" id="btn-${c}">${c}</button>`
-  ).join("");
+function displayProducts(products) {
+    const container = document.getElementById("product-list");
+    container.innerHTML = "";
+
+    products.forEach(p => {
+        if (!p["Product Name"]) return; // skip empty rows
+
+        const card = document.createElement("div");
+        card.className = "product-card";
+
+        card.innerHTML = `
+            <img src="${p["Image URL"]}" alt="${p["Product Name"]}">
+            <h3>${p["Product Name"]}</h3>
+            <p>${p["Description"]}</p>
+            <a href="${p["Amazon Link"]}" target="_blank" class="buy-btn">Buy on Amazon</a>
+        `;
+
+        container.appendChild(card);
+    });
 }
 
-// Filter by category
-function filterByCategory(category) {
-  document.querySelectorAll(".categories button").forEach(btn => btn.classList.remove("active"));
-  document.getElementById("btn-" + category).classList.add("active");
-  categoryFilter.value = category;
-  filterProducts();
-}
-
-// Search + Filter
-function filterProducts() {
-  const searchText = searchInput.value.toLowerCase();
-  const selectedCategory = categoryFilter.value;
-  
-  let filtered = products.filter(p =>
-    (selectedCategory === "All" || p.category === selectedCategory) &&
-    p.name.toLowerCase().includes(searchText)
-  );
-  
-  renderProducts(filtered);
-}
-
-// Events
-searchInput.addEventListener("input", filterProducts);
-categoryFilter.addEventListener("change", filterProducts);
-
-// Init
-loadCategories();
-renderProducts(products);
-filterByCategory("All");
-</script>
-
-</body>
-</html>
+loadProducts();
