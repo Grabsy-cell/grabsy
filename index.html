@@ -1,160 +1,69 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Grabsy Finds</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f3f8f4;
-    }
-    header {
-      background: #2f7a32;
-      color: white;
-      text-align: center;
-      padding: 1rem;
-      font-size: 1.5rem;
-      font-weight: bold;
-    }
-    .filters {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin: 1rem;
-      gap: 10px;
-    }
-    .filters button {
-      padding: 8px 16px;
-      border: none;
-      border-radius: 20px;
-      cursor: pointer;
-      background: #ddd;
-      font-size: 14px;
-      transition: 0.3s;
-    }
-    .filters button.active {
-      background: #2f7a32;
-      color: white;
-    }
-    .products {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 20px;
-      padding: 20px;
-    }
-    .product-card {
-      background: white;
-      border-radius: 12px;
-      padding: 16px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      text-align: center;
-    }
-    .product-card img {
-      max-width: 100%;
-      height: 200px;
-      object-fit: contain;
-      border-radius: 8px;
-    }
-    .product-card h3 {
-      font-size: 18px;
-      margin: 10px 0;
-    }
-    .product-card p {
-      font-size: 14px;
-      color: #555;
-      min-height: 60px;
-    }
-    .product-card a {
-      display: inline-block;
-      margin-top: 10px;
-      padding: 10px 16px;
-      background: #ff9900;
-      color: white;
-      font-weight: bold;
-      text-decoration: none;
-      border-radius: 6px;
-    }
-    .product-card a:hover {
-      background: #e68a00;
-    }
-  </style>
-</head>
-<body>
-  <header>Grabsy Finds</header>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script>
+  const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyjqk5-lDiw3arwv281cvWMPyAfp7_uBUXVWlQslsixT-u5fAXSNmV0gkB5-HieWRqYGOI7JFdhsJ8/pub?output=csv";
 
-  <div class="filters" id="filters"></div>
-
-  <div class="products" id="products"></div>
-
-  <script>
-    const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyjqk5-lDiw3arwv281cvWMPyAfp7_uBUXVWlQslsixT-u5fAXSNmV0gkB5-HieWRqYGOI7JFdhsJ8/pub?output=csv";
-
-    async function fetchData() {
-      const response = await fetch(sheetURL);
-      const data = await response.text();
-      const rows = data.split("\n").map(r => r.split(","));
-      const headers = rows[0];
-      const products = rows.slice(1).map(r => {
-        let obj = {};
-        headers.forEach((h, i) => obj[h.trim()] = r[i] ? r[i].trim() : "");
-        return obj;
+  async function fetchData() {
+    const response = await fetch(sheetURL);
+    const csv = await response.text();
+    return new Promise((resolve) => {
+      Papa.parse(csv, {
+        header: true,
+        skipEmptyLines: true,
+        complete: function(results) {
+          resolve(results.data);
+        }
       });
-      return products;
-    }
+    });
+  }
 
-    function renderFilters(categories) {
-      const filterContainer = document.getElementById("filters");
-      filterContainer.innerHTML = "";
+  function renderFilters(categories) {
+    const filterContainer = document.getElementById("filters");
+    filterContainer.innerHTML = "";
 
-      const allBtn = document.createElement("button");
-      allBtn.textContent = "All";
+    const allBtn = document.createElement("button");
+    allBtn.textContent = "All";
+    allBtn.classList.add("active");
+    allBtn.onclick = () => {
+      document.querySelectorAll(".filters button").forEach(btn => btn.classList.remove("active"));
       allBtn.classList.add("active");
-      allBtn.onclick = () => {
+      renderProducts(window.allProducts);
+    };
+    filterContainer.appendChild(allBtn);
+
+    categories.forEach(cat => {
+      const btn = document.createElement("button");
+      btn.textContent = cat;
+      btn.onclick = () => {
         document.querySelectorAll(".filters button").forEach(btn => btn.classList.remove("active"));
-        allBtn.classList.add("active");
-        renderProducts(window.allProducts);
+        btn.classList.add("active");
+        renderProducts(window.allProducts.filter(p => p.Category === cat));
       };
-      filterContainer.appendChild(allBtn);
+      filterContainer.appendChild(btn);
+    });
+  }
 
-      categories.forEach(cat => {
-        const btn = document.createElement("button");
-        btn.textContent = cat;
-        btn.onclick = () => {
-          document.querySelectorAll(".filters button").forEach(btn => btn.classList.remove("active"));
-          btn.classList.add("active");
-          renderProducts(window.allProducts.filter(p => p.Category === cat));
-        };
-        filterContainer.appendChild(btn);
-      });
-    }
+  function renderProducts(products) {
+    const container = document.getElementById("products");
+    container.innerHTML = "";
 
-    function renderProducts(products) {
-      const container = document.getElementById("products");
-      container.innerHTML = "";
+    products.forEach(p => {
+      const card = document.createElement("div");
+      card.className = "product-card";
+      card.innerHTML = `
+        <img src="${p["Image URL"]}" alt="${p["Product Name"]}" />
+        <h3>${p["Product Name"] || "Untitled"}</h3>
+        <p>${p["Description"] || ""}</p>
+        <a href="${p["Amazon Link"]}" target="_blank">Buy on Amazon</a>
+      `;
+      container.appendChild(card);
+    });
+  }
 
-      products.forEach(p => {
-        const card = document.createElement("div");
-        card.className = "product-card";
-        card.innerHTML = `
-          <img src="${p["Image URL"]}" alt="${p["Product Name"]}" />
-          <h3>${p["Product Name"] || "Untitled"}</h3>
-          <p>${p["Description"] || ""}</p>
-          <a href="${p["Amazon Link"]}" target="_blank">Buy on Amazon</a>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    (async () => {
-      const products = await fetchData();
-      window.allProducts = products;
-      const categories = [...new Set(products.map(p => p.Category).filter(c => c))];
-      renderFilters(categories);
-      renderProducts(products);
-    })();
-  </script>
-</body>
-</html>
+  (async () => {
+    const products = await fetchData();
+    window.allProducts = products;
+    const categories = [...new Set(products.map(p => p.Category).filter(c => c))];
+    renderFilters(categories);
+    renderProducts(products);
+  })();
+</script>
