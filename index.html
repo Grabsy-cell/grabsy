@@ -90,28 +90,31 @@
   
   <div class="products" id="products"></div>
   
+  <!-- PapaParse CSV parser -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  
   <script>
     let products = [];
 
     async function loadProducts() {
       const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyjqk5-lDiw3arwv281cvWMPyAfp7_uBUXVWlQslsixT-u5fAXSNmV0gkB5-HieWRqYGOI7JFdhsJ8/pub?output=csv";
       const res = await fetch(url);
-      const text = await res.text();
-      const rows = text.split("\n").map(r => r.split(","));
-      const headers = rows[0];
-      products = rows.slice(1).map(r => {
-        let obj = {};
-        headers.forEach((h,i) => obj[h.trim()] = r[i] ? r[i].trim() : "");
-        return obj;
+      const csvText = await res.text();
+
+      Papa.parse(csvText, {
+        header: true,
+        skipEmptyLines: true,
+        complete: function(results) {
+          products = results.data;
+          display(products);
+        }
       });
-      display(products);
     }
 
     function display(list) {
       const container = document.getElementById("products");
       container.innerHTML = "";
       list.forEach(p => {
-        // fallback image if blank
         let img = p["Image URL"] && p["Image URL"].startsWith("http") ? p["Image URL"] : "https://via.placeholder.com/200x200?text=No+Image";
         container.innerHTML += `
           <div class="card">
