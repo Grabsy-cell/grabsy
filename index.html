@@ -31,39 +31,37 @@
 </div>
 
 <!-- Category Buttons -->
-<div class="categories" id="categoryButtons"></div>
+<div class="categories" id="categoryButtons">
+  <!-- JS will load buttons here -->
+</div>
 
 <!-- Products Section -->
 <div class="products" id="productList"></div>
 
 <script>
-// Sample Products (add more here)
 const products = [
   {
     name: "Office Use Water Bottle",
     description: "Stainless steel Milton bottle – compact, leakproof, and stylish for office use.",
     image: "https://m.media-amazon.com/images/I/61RGo-R7EOL._SX679_.jpg",
     link: "https://amzn.to/3UF4OwD",
-    category: "Home and Kitchen"
+    category: "Office"
   },
   {
     name: "Celeste Perfume",
     description: "Long-lasting fragrance for daily wear with a refreshing floral scent.",
     image: "https://m.media-amazon.com/images/I/71lqm2wGq3L._SX522_.jpg",
     link: "https://amzn.to/3VrX7cp",
-    category: "Beauty and Fashion"
+    category: "Beauty & Health"
   },
   {
     name: "Skin Tone Cream",
     description: "Moisturizing daily cream to keep your skin soft, fresh, and glowing.",
     image: "https://m.media-amazon.com/images/I/61I7Iu1o1xL._SX522_.jpg",
     link: "https://amzn.to/4erWf8O",
-    category: "Beauty and Fashion"
+    category: "Beauty & Health"
   }
 ];
-
-// ✅ Fixed categories
-const fixedCategories = ["All", "Clothes", "Home and Kitchen", "Beauty and Fashion", "Kids", "Men", "Women"];
 
 // DOM Elements
 const productList = document.getElementById("productList");
@@ -92,8 +90,10 @@ function renderProducts(items) {
 
 // Load categories in dropdown + buttons
 function loadCategories() {
-  categoryFilter.innerHTML = fixedCategories.map(c => `<option value="${c}">${c}</option>`).join("");
-  categoryButtons.innerHTML = fixedCategories.map(c => 
+  let categories = ["All", ...new Set(products.map(p => p.category))];
+  categoryFilter.innerHTML = categories.map(c => `<option value="${c}">${c}</option>`).join("");
+  
+  categoryButtons.innerHTML = categories.map(c => 
     `<button onclick="filterByCategory('${c}')" id="btn-${c}">${c}</button>`
   ).join("");
 }
