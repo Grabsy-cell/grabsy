@@ -79,4 +79,62 @@
   <header>Grabsy Finds</header>
   
   <div class="filters">
-    <button class="active" onclick="filterProducts('All')">All</button
+    <button class="active" onclick="filterProducts('All')">All</button>
+    <button onclick="filterProducts('Clothes')">Clothes</button>
+    <button onclick="filterProducts('Home and Kitchen')">Home and Kitchen</button>
+    <button onclick="filterProducts('Beauty and Fashion')">Beauty and Fashion</button>
+    <button onclick="filterProducts('Kids')">Kids</button>
+    <button onclick="filterProducts('Men')">Men</button>
+    <button onclick="filterProducts('Women')">Women</button>
+  </div>
+  
+  <div class="products" id="products"></div>
+  
+  <script>
+    let products = [];
+
+    async function loadProducts() {
+      const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyjqk5-lDiw3arwv281cvWMPyAfp7_uBUXVWlQslsixT-u5fAXSNmV0gkB5-HieWRqYGOI7JFdhsJ8/pub?output=csv";
+      const res = await fetch(url);
+      const text = await res.text();
+      const rows = text.split("\n").map(r => r.split(","));
+      const headers = rows[0];
+      products = rows.slice(1).map(r => {
+        let obj = {};
+        headers.forEach((h,i) => obj[h.trim()] = r[i] ? r[i].trim() : "");
+        return obj;
+      });
+      display(products);
+    }
+
+    function display(list) {
+      const container = document.getElementById("products");
+      container.innerHTML = "";
+      list.forEach(p => {
+        // fallback image if blank
+        let img = p["Image URL"] && p["Image URL"].startsWith("http") ? p["Image URL"] : "https://via.placeholder.com/200x200?text=No+Image";
+        container.innerHTML += `
+          <div class="card">
+            <img src="${img}" alt="${p["Title"] || "Product"}">
+            <h3>${p["Title"] || "Untitled"}</h3>
+            ${p["Description"] ? `<p>${p["Description"]}</p>` : ""}
+            <a href="${p["Amazon Link"] || "#"}" target="_blank">Buy on Amazon</a>
+          </div>
+        `;
+      });
+    }
+
+    function filterProducts(cat) {
+      document.querySelectorAll(".filters button").forEach(b => b.classList.remove("active"));
+      event.target.classList.add("active");
+      if (cat === "All") {
+        display(products);
+      } else {
+        display(products.filter(p => (p["Category"] || "").toLowerCase() === cat.toLowerCase()));
+      }
+    }
+
+    loadProducts();
+  </script>
+</body>
+</html>
