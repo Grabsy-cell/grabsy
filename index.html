@@ -1,68 +1,135 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Grabsy Finds</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grabsy Store</title>
   <style>
-    body { font-family: 'Poppins', sans-serif; margin:0; padding:0; background:#f3f3f3; color:#333; }
-    header { background:#157f3a; color:#fff; padding:16px; text-align:center; }
-    header h1 { margin:0; font-size:1.8rem; }
-    header p { margin:0; font-size:1rem; color:#d0f4c9; }
-    #products { display:grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); gap:1.2rem; padding:1.5rem; max-width:1200px; margin:auto; }
-    .card { background:#ffffff; border-radius:12px; padding:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08); display:flex; flex-direction:column; transition:transform .15s; }
-    .card:hover { transform: translateY(-4px); }
-    .card img { width:100%; height:180px; object-fit:contain; margin-bottom:12px; }
-    .card h3 { font-size:1.2rem; margin:8px 0; color:#111; }
-    .card p.desc { flex:1; font-size:0.95rem; color:#555; margin-bottom:8px; }
-    .card p.price { font-weight:600; color:#006600; margin:8px 0; }
-    .btn { background:#28a745; color:#fff; padding:10px 16px; border-radius:6px; text-align:center; text-decoration:none; font-weight:600; }
-    .btn:hover { background:#218838; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f9f9f9;
+    }
+    .navbar {
+      background: #111;
+      padding: 10px;
+    }
+    .navbar ul {
+      list-style: none;
+      display: flex;
+      margin: 0;
+      padding: 0;
+    }
+    .navbar li {
+      margin: 0 15px;
+    }
+    .navbar a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    #products {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+    .product {
+      background: #fff;
+      border-radius: 10px;
+      padding: 15px;
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .product img {
+      max-width: 100%;
+      border-radius: 8px;
+    }
+    .product h3 {
+      margin: 10px 0 5px;
+    }
+    .product p {
+      font-size: 14px;
+      color: #555;
+    }
+    .product a {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: #111;
+      color: white;
+      border-radius: 5px;
+      text-decoration: none;
+    }
+    .product a:hover {
+      background: #444;
+    }
   </style>
 </head>
 <body>
 
-  <header>
-    <h1>Grabsy Finds</h1>
-    <p>Grab + Easy Finds = Grabsy Finds</p>
-  </header>
+  <!-- Navigation Menu -->
+  <nav class="navbar">
+    <ul>
+      <li><a href="#" onclick="filterCategory('All')">All</a></li>
+      <li><a href="#" onclick="filterCategory('Men')">Men</a></li>
+      <li><a href="#" onclick="filterCategory('Women')">Women</a></li>
+      <li><a href="#" onclick="filterCategory('Kids')">Kids</a></li>
+      <li><a href="#" onclick="filterCategory('Home & Kitchen')">Home & Kitchen</a></li>
+      <li><a href="#" onclick="filterCategory('Beauty & Health')">Beauty & Health</a></li>
+      <li><a href="#" onclick="filterCategory('Electronics')">Electronics</a></li>
+      <li><a href="#" onclick="filterCategory('Grocery')">Grocery</a></li>
+    </ul>
+  </nav>
 
-  <div id="products"><p style="grid-column:1/-1; text-align:center;">Loading products…</p></div>
+  <!-- Products Container -->
+  <div id="products"></div>
 
   <script>
-    const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyjqk5-lDiw3arwv281cvWMPyAfp7_uBUXVWlQslsixT-u5fAXSNmV0gkB5-HieWRqYGOI7JFdhsJ8/pub?output=csv";
+    let allProducts = [];
 
-    Papa.parse(sheetURL, {
-      download: true,
-      header: true,
-      skipEmptyLines: true,
-      complete: function(results) {
-        const container = document.getElementById("products");
-        container.innerHTML = "";
+    async function fetchProducts() {
+      const response = await fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vRyjqk5-lDiw3arwv281cvWMPyAfp7_uBUXVWlQslsixT-u5fAXSNmV0gkB5-HieWRqYGOI7JFdhsJ8/pub?output=csv");
+      const data = await response.text();
+      const rows = data.split("\n").slice(1);
 
-        results.data.forEach(row => {
-          const name = row["Product Name"]?.trim();
-          const desc = row["Description"]?.trim();
-          const img = (row["Image URL"]?.trim() || "").replace(/["']/g, '');
-          const url = (row["Amazon Link"]?.trim() || "#").replace(/["']/g, '');
-          const price = row["Price"]?.trim() || "Check Price";
-          if (!name) return;
+      allProducts = rows.map(row => {
+        const cols = row.split(",");
+        const [name, description, image, link, category] = cols;
+        return { name, description, image, link, category };
+      });
 
-          const card = document.createElement("div");
-          card.className = "card";
-          card.innerHTML = `
-            <img src="${img}" alt="${name}" onerror="this.src='https://via.placeholder.com/300?text=No+Image'" />
-            <h3>${name}</h3>
-            <p class="desc">${desc}</p>
-            <p class="price">${price}</p>
-            <a class="btn" href="${url}" target="_blank">Buy on Amazon</a>
-          `;
-          container.appendChild(card);
-        });
+      displayProducts(allProducts);
+    }
+
+    function displayProducts(products) {
+      const container = document.getElementById("products");
+      container.innerHTML = "";
+      products.forEach(p => {
+        const item = document.createElement("div");
+        item.className = "product";
+        item.innerHTML = `
+          <img src="${p.image}" alt="${p.name}">
+          <h3>${p.name}</h3>
+          <p>${p.description}</p>
+          <a href="${p.link}" target="_blank">Buy Now</a>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function filterCategory(category) {
+      if (category === "All") {
+        displayProducts(allProducts);
+      } else {
+        const filtered = allProducts.filter(p => p.category.trim() === category);
+        displayProducts(filtered);
       }
-    });
+    }
+
+    fetchProducts();
   </script>
+
 </body>
 </html>
