@@ -1,43 +1,154 @@
-// Your Google Sheet CSV export link
-const sheetURL = "https://docs.google.com/spreadsheets/d/1UzfheO8LeHtje8jUZeugkd_vxb-rA2F0MB6YGerWyk/gviz/tq?tqx=out:csv";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grabsy Finds</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4fff4;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #216C2A;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+    }
+    .container {
+      width: 90%;
+      margin: auto;
+      padding: 20px;
+    }
+    .filters {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .filters button {
+      margin: 5px;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: #ddd;
+    }
+    .filters button.active {
+      background: #216C2A;
+      color: white;
+    }
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+    .product-card {
+      background: white;
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .product-card img {
+      max-width: 100%;
+      height: 200px;
+      object-fit: contain;
+      margin-bottom: 10px;
+    }
+    .product-card h3 {
+      font-size: 18px;
+      margin: 10px 0;
+    }
+    .product-card p {
+      font-size: 14px;
+      color: #555;
+    }
+    .product-card a {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 10px 15px;
+      background: orange;
+      color: white;
+      border-radius: 6px;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <header>Grabsy Finds</header>
 
-async function loadProducts() {
-    const response = await fetch(sheetURL);
-    const data = await response.text();
+  <div class="container">
+    <div class="filters">
+      <button class="filter-btn active" data-category="All">All</button>
+      <button class="filter-btn" data-category="Clothes">Clothes</button>
+      <button class="filter-btn" data-category="Home & Kitchen">Home and Kitchen</button>
+      <button class="filter-btn" data-category="Beauty and Fashion">Beauty and Fashion</button>
+      <button class="filter-btn" data-category="Kids">Kids</button>
+      <button class="filter-btn" data-category="Men">Men</button>
+      <button class="filter-btn" data-category="Women">Women</button>
+    </div>
 
-    // Parse CSV
-    const rows = data.split("\n").map(row => row.split(","));
-    const headers = rows[0];
-    const products = rows.slice(1).map(row => {
-        let item = {};
-        headers.forEach((h, i) => {
-            item[h.trim()] = row[i] ? row[i].trim() : "";
+    <div class="product-grid" id="productGrid"></div>
+  </div>
+
+  <script>
+    const sheetUrl = "https://docs.google.com/spreadsheets/d/1UzfheO8LeHtje8jULZeugkd_vxB-rA2F0MB6YGerWyk/export?format=csv&gid=0";
+
+    async function fetchProducts() {
+      const response = await fetch(sheetUrl);
+      const data = await response.text();
+
+      const rows = data.split("\n").slice(1); // skip header
+      const products = rows.map(row => {
+        const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); // handle commas inside quotes
+        return {
+          name: cols[0]?.replace(/"/g, "").trim(),
+          description: cols[1]?.replace(/"/g, "").trim(),
+          image: cols[2]?.replace(/"/g, "").trim(),
+          link: cols[3]?.replace(/"/g, "").trim(),
+          price: cols[4]?.replace(/"/g, "").trim(),
+          category: cols[5]?.replace(/"/g, "").trim()
+        };
+      });
+
+      renderProducts(products);
+
+      // category filtering
+      document.querySelectorAll(".filter-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          const category = btn.getAttribute("data-category");
+          if (category === "All") {
+            renderProducts(products);
+          } else {
+            renderProducts(products.filter(p => p.category === category));
+          }
         });
-        return item;
-    });
+      });
+    }
 
-    displayProducts(products);
-}
-
-function displayProducts(products) {
-    const container = document.getElementById("product-list");
-    container.innerHTML = "";
-
-    products.forEach(p => {
-        if (!p["Product Name"]) return; // skip empty rows
-
+    function renderProducts(products) {
+      const grid = document.getElementById("productGrid");
+      grid.innerHTML = "";
+      products.forEach(p => {
+        if (!p.name) return;
         const card = document.createElement("div");
         card.className = "product-card";
-
         card.innerHTML = `
-            <img src="${p["Image URL"]}" alt="${p["Product Name"]}">
-            <h3>${p["Product Name"]}</h3>
-            <p>${p["Description"]}</p>
-            <a href="${p["Amazon Link"]}" target="_blank" class="buy-btn">Buy on Amazon</a>
+          <img src="${p.image}" alt="${p.name}">
+          <h3>${p.name}</h3>
+          <p>${p.description}</p>
+          <a href="${p.link}" target="_blank">Buy on Amazon</a>
         `;
+        grid.appendChild(card);
+      });
+    }
 
-        container.appendChild(card);
-    });
-}
-
-loadProducts();
+    fetchProducts();
+  </script>
+</body>
+</html>
