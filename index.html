@@ -1,48 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Grabsy Finds</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f3f8f3;
       margin: 0;
       padding: 0;
+      background: #f3f8f4;
     }
     header {
-      background: #2e7d32;
+      background: #2f7a32;
       color: white;
       text-align: center;
-      padding: 15px;
-      font-size: 22px;
+      padding: 1rem;
+      font-size: 1.5rem;
       font-weight: bold;
     }
-    .product-container {
+    .filters {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 1rem;
+      gap: 10px;
+    }
+    .filters button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      background: #ddd;
+      font-size: 14px;
+      transition: 0.3s;
+    }
+    .filters button.active {
+      background: #2f7a32;
+      color: white;
+    }
+    .products {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
       gap: 20px;
       padding: 20px;
     }
     .product-card {
       background: white;
       border-radius: 12px;
-      padding: 15px;
+      padding: 16px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
       text-align: center;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
     .product-card img {
       max-width: 100%;
       height: 200px;
       object-fit: contain;
-      margin-bottom: 10px;
+      border-radius: 8px;
     }
     .product-card h3 {
       font-size: 18px;
-      color: #333;
       margin: 10px 0;
-      min-height: 50px;
     }
     .product-card p {
       font-size: 14px;
@@ -52,38 +70,64 @@
     .product-card a {
       display: inline-block;
       margin-top: 10px;
-      padding: 10px 15px;
+      padding: 10px 16px;
       background: #ff9900;
       color: white;
-      text-decoration: none;
-      border-radius: 8px;
       font-weight: bold;
+      text-decoration: none;
+      border-radius: 6px;
     }
     .product-card a:hover {
-      background: #cc7a00;
+      background: #e68a00;
     }
   </style>
 </head>
 <body>
   <header>Grabsy Finds</header>
-  <div class="product-container" id="products"></div>
 
-  <!-- Papa Parse Library -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <div class="filters" id="filters"></div>
+
+  <div class="products" id="products"></div>
 
   <script>
     const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyjqk5-lDiw3arwv281cvWMPyAfp7_uBUXVWlQslsixT-u5fAXSNmV0gkB5-HieWRqYGOI7JFdhsJ8/pub?output=csv";
 
-    async function fetchProducts() {
-      const res = await fetch(sheetURL);
-      const csvText = await res.text();
+    async function fetchData() {
+      const response = await fetch(sheetURL);
+      const data = await response.text();
+      const rows = data.split("\n").map(r => r.split(","));
+      const headers = rows[0];
+      const products = rows.slice(1).map(r => {
+        let obj = {};
+        headers.forEach((h, i) => obj[h.trim()] = r[i] ? r[i].trim() : "");
+        return obj;
+      });
+      return products;
+    }
 
-      return new Promise((resolve) => {
-        Papa.parse(csvText, {
-          header: true,
-          skipEmptyLines: true,
-          complete: (results) => resolve(results.data)
-        });
+    function renderFilters(categories) {
+      const filterContainer = document.getElementById("filters");
+      filterContainer.innerHTML = "";
+
+      const allBtn = document.createElement("button");
+      allBtn.textContent = "All";
+      allBtn.classList.add("active");
+      allBtn.onclick = () => {
+        document.querySelectorAll(".filters button").forEach(btn => btn.classList.remove("active"));
+        allBtn.classList.add("active");
+        renderProducts(window.allProducts);
+      };
+      filterContainer.appendChild(allBtn);
+
+      categories.forEach(cat => {
+        const btn = document.createElement("button");
+        btn.textContent = cat;
+        btn.onclick = () => {
+          document.querySelectorAll(".filters button").forEach(btn => btn.classList.remove("active"));
+          btn.classList.add("active");
+          renderProducts(window.allProducts.filter(p => p.Category === cat));
+        };
+        filterContainer.appendChild(btn);
       });
     }
 
@@ -95,17 +139,20 @@
         const card = document.createElement("div");
         card.className = "product-card";
         card.innerHTML = `
-          <img src="${p["Image URL"] || 'https://via.placeholder.com/200'}" alt="${p["Product Name"] || 'Product'}">
+          <img src="${p["Image URL"]}" alt="${p["Product Name"]}" />
           <h3>${p["Product Name"] || "Untitled"}</h3>
           <p>${p["Description"] || ""}</p>
-          <a href="${p["Amazon Link"] || "#"}" target="_blank">Buy on Amazon</a>
+          <a href="${p["Amazon Link"]}" target="_blank">Buy on Amazon</a>
         `;
         container.appendChild(card);
       });
     }
 
     (async () => {
-      const products = await fetchProducts();
+      const products = await fetchData();
+      window.allProducts = products;
+      const categories = [...new Set(products.map(p => p.Category).filter(c => c))];
+      renderFilters(categories);
       renderProducts(products);
     })();
   </script>
