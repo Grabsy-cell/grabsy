@@ -5,24 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Grabsy Finds</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f9f4; }
-    header { background-color: #2e7d32; color: white; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; }
-    .filter-buttons { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin: 20px 0; }
-    .filter-buttons button { background-color: #e0e0e0; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; transition: background-color 0.3s; }
-    .filter-buttons button.active, .filter-buttons button:hover { background-color: #2e7d32; color: white; }
-    .products { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; padding: 20px; }
-    .product { background-color: white; border-radius: 10px; padding: 15px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15); display: flex; flex-direction: column; align-items: center; text-align: center; }
-    .product img { max-width: 100%; height: 200px; object-fit: contain; margin-bottom: 10px; }
-    .product h3 { font-size: 18px; margin: 10px 0; }
-    .product p { font-size: 14px; color: #555; margin: 5px 0 15px; }
-    .product a { text-decoration: none; background-color: orange; color: white; padding: 10px 15px; border-radius: 5px; font-weight: bold; transition: background-color 0.3s; }
-    .product a:hover { background-color: #e68900; }
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f7fdf7; }
+    header { background: #2d6a4f; color: white; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; }
+    .filters { text-align: center; padding: 20px; }
+    .filters button { margin: 5px; padding: 10px 15px; border: none; border-radius: 20px; cursor: pointer; background: #e0e0e0; }
+    .filters button.active { background: #2d6a4f; color: white; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; padding: 20px; }
+    .card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; }
+    .card img { max-width: 100%; max-height: 200px; object-fit: contain; border-radius: 10px; }
+    .card h3 { font-size: 18px; margin: 10px 0; }
+    .card p { font-size: 14px; color: #555; height: 50px; overflow: hidden; }
+    .price { font-weight: bold; color: #1b4332; margin: 5px 0; }
+    .card a { display: inline-block; margin-top: 10px; padding: 10px 15px; background: #2d6a4f; color: white; text-decoration: none; border-radius: 8px; }
   </style>
 </head>
 <body>
   <header>Grabsy Finds</header>
 
-  <div class="filter-buttons">
+  <div class="filters">
     <button class="active" onclick="filterProducts('All')">All</button>
     <button onclick="filterProducts('Clothes')">Clothes</button>
     <button onclick="filterProducts('Home & Kitchen')">Home and Kitchen</button>
@@ -32,61 +32,54 @@
     <button onclick="filterProducts('Women')">Women</button>
   </div>
 
-  <div class="products" id="products"></div>
-
-  <!-- PapaParse for correct CSV parsing -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <div class="grid" id="productGrid"></div>
 
   <script>
-    const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyjqk5-lDiw3arwv281cvWMPyAfp7_uBUXVWlQslsixT-u5fAXSNmV0gkB5-HieWRqYGOI7JFdhsJ8/pub?output=csv";
+    let allProducts = [];
 
     async function fetchProducts() {
-      const response = await fetch(sheetURL);
-      const csvData = await response.text();
+      const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyjqk5-lDiw3arwv281cvWMPyAfp7_uBUXVWlQslsixT-u5fAXSNmV0gkB5-HieWRqYGOI7JFdhsJ8/pub?output=csv";
+      const response = await fetch(url);
+      const data = await response.text();
+      const rows = data.split("\n").map(r => r.split(","));
 
-      Papa.parse(csvData, {
-        header: true,
-        skipEmptyLines: true,
-        complete: function(results) {
-          const products = results.data.filter(p => p.Name && p.Image && p.Link && p.Category);
-          displayProducts(products);
-        }
+      const headers = rows[0].map(h => h.trim());
+      const products = rows.slice(1).map(row => {
+        let obj = {};
+        headers.forEach((h, i) => { obj[h] = row[i]; });
+        return obj;
       });
+
+      allProducts = products.filter(p => p["Product Name"]); 
+      displayProducts(allProducts);
     }
 
     function displayProducts(products) {
-      const container = document.getElementById("products");
-      container.innerHTML = "";
-
-      products.forEach(product => {
+      const grid = document.getElementById("productGrid");
+      grid.innerHTML = "";
+      products.forEach(p => {
         const card = document.createElement("div");
-        card.className = "product";
-        card.setAttribute("data-category", product.Category);
-
+        card.className = "card";
         card.innerHTML = `
-          <img src="${product.Image}" alt="${product.Name}">
-          <h3>${product.Name}</h3>
-          <p>${product.Description || ""}</p>
-          <a href="${product.Link}" target="_blank">${product.Price || "Buy on Amazon"}</a>
+          <img src="${p["Image URL"]}" alt="${p["Product Name"]}">
+          <h3>${p["Product Name"]}</h3>
+          <p>${p["Description"] || ""}</p>
+          <div class="price">${p["Price"] || ""}</div>
+          <a href="${p["Amazon Link"]}" target="_blank">View on Amazon</a>
         `;
-
-        container.appendChild(card);
+        grid.appendChild(card);
       });
     }
 
     function filterProducts(category) {
-      const buttons = document.querySelectorAll(".filter-buttons button");
-      buttons.forEach(btn => btn.classList.remove("active"));
+      document.querySelectorAll(".filters button").forEach(btn => btn.classList.remove("active"));
       event.target.classList.add("active");
 
-      const products = document.querySelectorAll(".product");
-      products.forEach(product => {
-        if (category === "All" || product.getAttribute("data-category") === category) {
-          product.style.display = "flex";
-        } else {
-          product.style.display = "none";
-        }
-      });
+      if (category === "All") {
+        displayProducts(allProducts);
+      } else {
+        displayProducts(allProducts.filter(p => (p["Category"] || "").toLowerCase() === category.toLowerCase()));
+      }
     }
 
     fetchProducts();
