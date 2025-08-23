@@ -1,117 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Grabsy Store</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f8f9fa;
+      background: #f9f9f9;
       margin: 0;
-      padding: 20px;
+      padding: 0;
       text-align: center;
     }
     h1 {
-      margin-bottom: 20px;
+      margin-top: 20px;
+      color: #333;
     }
-    #products-grid {
+    .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
       gap: 20px;
+      padding: 20px;
       max-width: 1200px;
       margin: auto;
     }
     .card {
       background: white;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       padding: 15px;
-      text-align: center;
-      transition: transform 0.2s;
-    }
-    .card:hover {
-      transform: scale(1.03);
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
     .card img {
-      width: 100%;
-      height: 180px;
+      width: 150px;
+      height: 150px;
       object-fit: contain;
       margin-bottom: 10px;
     }
     .card h3 {
-      font-size: 16px;
+      font-size: 18px;
       margin: 10px 0;
-      height: 40px;
-      overflow: hidden;
+      color: #222;
     }
-    .card .price {
-      color: green;
+    .price {
+      font-size: 16px;
       font-weight: bold;
-      margin: 5px 0 15px;
+      color: green;
+      margin-bottom: 10px;
     }
-    .card .cta {
-      display: inline-block;
-      background: #ff9900;
+    .btn {
+      background: orange;
       color: white;
       padding: 10px 15px;
-      border-radius: 5px;
       text-decoration: none;
+      border-radius: 8px;
       font-weight: bold;
+      transition: 0.3s;
     }
-    .card .cta:hover {
-      background: #e68a00;
+    .btn:hover {
+      background: darkorange;
     }
   </style>
 </head>
 <body>
-
   <h1>Grabsy Store</h1>
   <p>Latest deals curated for you 👇</p>
-
-  <div id="products-grid"></div>
+  <div class="grid" id="product-grid"></div>
 
   <script>
-    (async function() {
-      const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyjqk5-lDiw3arwv281cvWMPyAfp7_uBUXVWlQslsixT-u5fAXSNmV0gkB5-HieWRqYGOI7JFdhsJ8/pub?output=csv";
+    const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyjqk5-lDiw3arwv281cvWMPyAfp7_uBUXVWlQslsixT-u5fAXSNmV0gkB5-HieWRqYGOI7JFdhsJ8/pub?output=csv";
+    const grid = document.getElementById("product-grid");
 
-      async function loadProducts() {
-        try {
-          const res = await fetch(sheetURL);
-          const text = await res.text();
-          const lines = text.trim().split('\n');
-          lines.shift(); // remove header row
-          const container = document.getElementById('products-grid');
-          container.innerHTML = '';
+    const placeholderImage = "https://via.placeholder.com/150?text=No+Image";
 
-          lines.forEach(line => {
-            const cols = line.split(',');
-            if (cols.length < 4) return;
-            const item = {
-              title: cols[0],
-              image: cols[1],
-              price: cols[2],
-              url: cols[3]
-            };
+    fetch(sheetUrl)
+      .then(response => response.text())
+      .then(data => {
+        const rows = data.split("\n").map(r => r.split(","));
+        rows.shift(); // remove header row
 
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.innerHTML = `
-              <img src="${item.image}" alt="${item.title}" />
-              <h3>${item.title}</h3>
-              <p class="price">${item.price}</p>
-              <a href="${item.url}" target="_blank" class="cta">Buy Now</a>
-            `;
-            container.appendChild(card);
-          });
-        } catch (err) {
-          console.error("Failed to load products:", err);
-        }
-      }
+        rows.forEach(row => {
+          // Flexible handling
+          let [title, image, price, url] = row;
 
-      await loadProducts();
-    })();
+          if (!title) return; // skip empty rows
+          if (!image || !image.startsWith("http")) image = placeholderImage;
+          if (!price) price = "Check Price";
+          if (!url || !url.startsWith("http")) url = "#";
+
+          // Create card
+          const card = document.createElement("div");
+          card.className = "card";
+          card.innerHTML = `
+            <img src="${image}" alt="${title}" onerror="this.src='${placeholderImage}'">
+            <h3>${title}</h3>
+            <p class="price">${price}</p>
+            <a class="btn" href="${url}" target="_blank">Buy Now</a>
+          `;
+          grid.appendChild(card);
+        });
+      })
+      .catch(err => {
+        console.error("Error loading sheet:", err);
+        grid.innerHTML = "<p>⚠️ Failed to load products. Please try again later.</p>";
+      });
   </script>
-
 </body>
 </html>
