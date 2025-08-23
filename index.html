@@ -5,83 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Grabsy Finds</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f4f9f4;
-    }
-    header {
-      background-color: #2e7d32;
-      color: white;
-      padding: 15px;
-      text-align: center;
-      font-size: 24px;
-      font-weight: bold;
-    }
-    .filter-buttons {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin: 20px 0;
-    }
-    .filter-buttons button {
-      background-color: #e0e0e0;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 20px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-    .filter-buttons button.active,
-    .filter-buttons button:hover {
-      background-color: #2e7d32;
-      color: white;
-    }
-    .products {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 20px;
-      padding: 20px;
-    }
-    .product {
-      background-color: white;
-      border-radius: 10px;
-      padding: 15px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-    }
-    .product img {
-      max-width: 100%;
-      height: 200px;
-      object-fit: contain;
-      margin-bottom: 10px;
-    }
-    .product h3 {
-      font-size: 18px;
-      margin: 10px 0;
-    }
-    .product p {
-      font-size: 14px;
-      color: #555;
-      margin: 5px 0 15px;
-    }
-    .product a {
-      text-decoration: none;
-      background-color: orange;
-      color: white;
-      padding: 10px 15px;
-      border-radius: 5px;
-      font-weight: bold;
-      transition: background-color 0.3s;
-    }
-    .product a:hover {
-      background-color: #e68900;
-    }
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f9f4; }
+    header { background-color: #2e7d32; color: white; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; }
+    .filter-buttons { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin: 20px 0; }
+    .filter-buttons button { background-color: #e0e0e0; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; transition: background-color 0.3s; }
+    .filter-buttons button.active, .filter-buttons button:hover { background-color: #2e7d32; color: white; }
+    .products { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; padding: 20px; }
+    .product { background-color: white; border-radius: 10px; padding: 15px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15); display: flex; flex-direction: column; align-items: center; text-align: center; }
+    .product img { max-width: 100%; height: 200px; object-fit: contain; margin-bottom: 10px; }
+    .product h3 { font-size: 18px; margin: 10px 0; }
+    .product p { font-size: 14px; color: #555; margin: 5px 0 15px; }
+    .product a { text-decoration: none; background-color: orange; color: white; padding: 10px 15px; border-radius: 5px; font-weight: bold; transition: background-color 0.3s; }
+    .product a:hover { background-color: #e68900; }
   </style>
 </head>
 <body>
@@ -99,5 +34,62 @@
 
   <div class="products" id="products"></div>
 
+  <!-- PapaParse for correct CSV parsing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
   <script>
-    const sheetURL = "https://docs.goo
+    const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyjqk5-lDiw3arwv281cvWMPyAfp7_uBUXVWlQslsixT-u5fAXSNmV0gkB5-HieWRqYGOI7JFdhsJ8/pub?output=csv";
+
+    async function fetchProducts() {
+      const response = await fetch(sheetURL);
+      const csvData = await response.text();
+
+      Papa.parse(csvData, {
+        header: true,
+        skipEmptyLines: true,
+        complete: function(results) {
+          const products = results.data.filter(p => p.Name && p.Image && p.Link && p.Category);
+          displayProducts(products);
+        }
+      });
+    }
+
+    function displayProducts(products) {
+      const container = document.getElementById("products");
+      container.innerHTML = "";
+
+      products.forEach(product => {
+        const card = document.createElement("div");
+        card.className = "product";
+        card.setAttribute("data-category", product.Category);
+
+        card.innerHTML = `
+          <img src="${product.Image}" alt="${product.Name}">
+          <h3>${product.Name}</h3>
+          <p>${product.Description || ""}</p>
+          <a href="${product.Link}" target="_blank">${product.Price || "Buy on Amazon"}</a>
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    function filterProducts(category) {
+      const buttons = document.querySelectorAll(".filter-buttons button");
+      buttons.forEach(btn => btn.classList.remove("active"));
+      event.target.classList.add("active");
+
+      const products = document.querySelectorAll(".product");
+      products.forEach(product => {
+        if (category === "All" || product.getAttribute("data-category") === category) {
+          product.style.display = "flex";
+        } else {
+          product.style.display = "none";
+        }
+      });
+    }
+
+    fetchProducts();
+  </script>
+</body>
+</html>
